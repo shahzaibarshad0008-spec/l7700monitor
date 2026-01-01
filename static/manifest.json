@@ -1,0 +1,24 @@
+{
+  "name": "Hospital Monitoring System",
+  "short_name": "HospitalMonitor",
+  "description": "Real-time hospital monitoring and alert system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e293b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://ui-avatars.com/api/?name=HM&background=1e293b&color=fff&size=192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://ui-avatars.com/api/?name=HM&background=1e293b&color=fff&size=512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

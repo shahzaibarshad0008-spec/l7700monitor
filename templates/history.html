@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call History - L7700 Monitor</title>
+    <link href="../static/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/plugins/tabler-icons/tabler-icons.min.css">
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('/static/fonts/inter-regular.woff2') format('woff2'),
+                url('/static/fonts/inter-regular.woff') format('woff');
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('/static/fonts/inter-semibold.woff2') format('woff2'),
+                url('/static/fonts/inter-semibold.woff') format('woff');
+            font-weight: 600;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .session-card {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Sidebar -->
+        <div
+            class="fixed left-0 top-0 h-full w-20 bg-gradient-to-b from-gray-800 to-gray-900 flex flex-col items-center py-6 shadow-xl z-50">
+            <div class="mb-8">
+                <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                    </svg>
+                </div>
+            </div>
+            <!-- Nav Items -->
+            <nav class="flex-1 flex flex-col space-y-4">
+                <a href="/" data-nav="dashboard"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                    </svg>
+                    <span class="text-xs mt-1">Dashboard</span>
+                </a>
+
+                <a href="/calls" data-nav="calls"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span class="text-xs mt-1">Calls</span>
+                </a>
+
+                <a href="/history" data-nav="history"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">History</span>
+                </a>
+
+                <a href="/config" data-nav="config"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">Config</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-20 p-8">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Call History & Activity Log</h1>
+                    <p class="text-gray-600 mt-2">View complete call sessions and event sequences</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Floor</label>
+                            <select id="floorFilter" onchange="applyFilters()"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Floors</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ward</label>
+                            <select id="wardFilter" onchange="applyFilters()"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Wards</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Room</label>
+                            <select id="roomFilter" onchange="applyFilters()"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Rooms</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Limit</label>
+                            <select id="limitFilter" onchange="applyFilters()"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="50">Last 50 sessions</option>
+                                <option value="100" selected>Last 100 sessions</option>
+                                <option value="200">Last 200 sessions</option>
+                                <option value="500">Last 500 sessions</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call Sessions -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">Call Sessions</h2>
+                    <div id="sessionsContainer" class="space-y-4">
+                        <div class="text-center py-12 text-gray-500">
+                            <p class="text-lg">Loading call history...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            sessions: [],
+            filters: {
+                floor_id: '',
+                ward_id: '',
+                room_id: '',
+                limit: 100
+            },
+            customColors: {}
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initPage();
+        });
+
+        async function initPage() {
+            console.log('[v0] Initializing history page');
+            await loadCustomColors();
+            await loadFilterOptions();
+            await loadHistory();
+        }
+
+        async function loadCustomColors() {
+            try {
+                const response = await fetch('/api/config/colors');
+                if (!response.ok) throw new Error('Failed to load colors');
+                const data = await response.json();
+                if (data && data.colors) {
+                    data.colors.forEach(color => {
+                        state.customColors[color.event_type] = color.color;
+                    });
+                }
+                console.log('[v0] Colors loaded:', state.customColors);
+            } catch (error) {
+                console.error('[v0] Error loading colors:', error);
+            }
+        }
+
+        async function loadFilterOptions() {
+            try {
+                const [floorsRes, wardsRes, roomsRes] = await Promise.all([
+                    fetch('/api/config/floors'),
+                    fetch('/api/config/wards'),
+                    fetch('/api/config/rooms')
+                ]);
+
+                const floorsData = await floorsRes.json();
+                const wardsData = await wardsRes.json();
+                const roomsData = await roomsRes.json();
+
+                // Populate floor filter
+                const floorSelect = document.getElementById('floorFilter');
+                (floorsData.floors || []).forEach(floor => {
+                    const option = document.createElement('option');
+                    option.value = floor.id;
+                    option.textContent = floor.name;
+                    floorSelect.appendChild(option);
+                });
+
+                // Populate ward filter
+                const wardSelect = document.getElementById('wardFilter');
+                (wardsData.wards || []).forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.id;
+                    option.textContent = ward.name;
+                    wardSelect.appendChild(option);
+                });
+
+                // Populate room filter
+                const roomSelect = document.getElementById('roomFilter');
+                (roomsData.rooms || []).forEach(room => {
+                    const option = document.createElement('option');
+                    option.value = room.id;
+                    option.textContent = `${room.room_name} (${room.room_number})`;
+                    roomSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('[v0] Error loading filter options:', error);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const params = new URLSearchParams();
+                if (state.filters.floor_id) params.append('floor_id', state.filters.floor_id);
+                if (state.filters.ward_id) params.append('ward_id', state.filters.ward_id);
+                if (state.filters.room_id) params.append('room_id', state.filters.room_id);
+                params.append('limit', state.filters.limit);
+
+                const url = `/api/history/calls?${params}`;
+                console.log('[v0] Fetching history from:', url);
+
+                const response = await fetch(url);
+                console.log('[v0] Response status:', response.status);
+
+                if (!response.ok) throw new Error('Failed to load history');
+
+                state.sessions = await response.json();
+                console.log('[v0] Loaded sessions:', state.sessions.length);
+                console.log('[v0] Session data:', state.sessions);
+
+                renderSessions();
+            } catch (error) {
+                console.error('[v0] Error loading history:', error);
+                document.getElementById('sessionsContainer').innerHTML = '<div class="text-center py-12 text-red-500"><p class="text-lg">Error loading call history: ' + error.message + '</p></div>';
+            }
+        }
+
+        function applyFilters() {
+            state.filters.floor_id = document.getElementById('floorFilter').value;
+            state.filters.ward_id = document.getElementById('wardFilter').value;
+            state.filters.room_id = document.getElementById('roomFilter').value;
+            state.filters.limit = parseInt(document.getElementById('limitFilter').value);
+            loadHistory();
+        }
+
+        function renderSessions() {
+            const container = document.getElementById('sessionsContainer');
+
+            if (state.sessions.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-500"><p class="text-lg">No call sessions found</p></div>';
+                return;
+            }
+
+            container.innerHTML = state.sessions.map(session => `
+                <div class="session-card border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">${session.room_name || 'Unknown Room'}</h3>
+                            <p class="text-sm text-gray-600">${session.bed_name || 'Bed ' + session.bed_number}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-4 py-2 rounded-full font-semibold text-sm" style="background-color: ${getEventColor(session.first_event_type)}20; color: ${getEventColor(session.first_event_type)}">
+                                ${session.first_event_type}
+                            </span>
+                            <p class="text-xs text-gray-500 mt-2">${session.started_at}</p>
+                        </div>
+                    </div>
+
+                    <!-- Location Info -->
+                    <div class="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        <span>${session.floor_name}</span>
+                        <span>-</span>
+                        <span>${session.ward_name}</span>
+                        <span>-</span>
+                        <span>Duration: <strong>${formatDuration(session.duration_seconds)}</strong></span>
+                    </div>
+
+                    <!-- Event Sequence Timeline -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-sm font-semibold text-gray-700 mb-3">Event Sequence</div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${session.event_sequence.map((event, idx) => `
+                                <div class="flex items-center">
+                                    <div class="px-3 py-1 rounded-full text-sm font-medium" style="background-color: ${getEventColor(event.event_type)}20; color: ${getEventColor(event.event_type)}">
+                                        ${event.event_type}
+                                    </div>
+                                    <span class="text-xs text-gray-500 ml-2">${event.timestamp}</span>
+                                    ${idx < session.event_sequence.length - 1 ? '<span class="text-gray-400 mx-2">→</span>' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getEventColor(eventType) {
+            // Use custom colors if available, otherwise use defaults
+            if (state.customColors[eventType]) {
+                return state.customColors[eventType];
+            }
+
+            const defaultColors = {
+                'Call': '#3B82F6',
+                'Emergency': '#EF4444',
+                'Alarm': '#F97316',
+                'Assistance': '#A855F7',
+                'Accept': '#10B981',
+                'Cancel': '#6B7280',
+                'Presence': '#8B5CF6',
+                'Reset': '#6B7280',
+                'ROOM SERVICE': '#06B6D4',
+                'Doctor Present': '#EC4899',
+                'CATERING SERVICE': '#14B8A6',
+                'Isolation': '#F59E0B',
+                'Low Battery': '#EF4444',
+                'Present': '#10B981'
+            };
+            return defaultColors[eventType] || '#6B7280';
+        }
+
+        function formatDuration(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            if (minutes < 60) return `${minutes}m ${secs}s`;
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}h ${mins}m`;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadHistory();
+        }, 30000);
+    </script>
+    <!-- Add shared sidebar script before other scripts -->
+    <script src="/static/js/shared-sidebar.js"></script>
+</body>
+
+</html>

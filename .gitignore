@@ -1,0 +1,43 @@
+# __pycache__/
+# *.pyc
+# *.db
+# *.sqlite3
+# .env
+# venv/
+# .vscode/
+# *.log
+# node_modules/
+# .DS_Store
+
+
+
+# venv
+.venv/
+venv/
+ENV/
+env/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# env files
+.env
+.env.*
+!.env.example
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# local data
+*.sqlite3
+*.db
+
+# migrations cache
+migrations/**/__pycache__/
+EOF

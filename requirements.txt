@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+websockets
+opencv-python
+numpy
+onvif-zeep
+pymysql
+sqlalchemy
+pytz
+python-dotenv

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Monitoring System</title>
+    <script src="../static/js/chart.min.js"></script>
+    <link href="../static/css/output.css" rel="stylesheet">
+    <meta name="theme-color" content="#1e293b">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-icon {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover .sidebar-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .call-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .call-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .badge-call {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-alarm {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-emergency {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-assistance {
+            background-color: #fef08a;
+            color: #b45309;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* Add fullscreen CSS styling for the sidebar */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 9999;
+            background: white;
+            border-left: none;
+        }
+
+        .fullscreen .flex-shrink-0 {
+            flex-shrink: 0 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div id="app" class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <!-- Reusable Sidebar Component -->
+        <div class="w-20 bg-slate-800 flex flex-col items-center py-6 space-y-8">
+            <!-- Logo -->
+            <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                </svg>
+            </div>
+
+            <!-- Nav Items -->
+            <nav class="flex-1 flex flex-col space-y-4">
+                <a href="/" data-nav="dashboard"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                    </svg>
+                    <span class="text-xs mt-1">Dashboard</span>
+                </a>
+
+                <a href="/calls" data-nav="calls"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span class="text-xs mt-1">Calls</span>
+                </a>
+
+                <a href="/history" data-nav="history"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">History</span>
+                </a>
+
+                <a href="/config" data-nav="config"
+                    class="sidebar-item flex flex-col items-center py-3 px-4 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">Config</span>
+                </a>
+            </nav>
+
+            <!-- User Avatar -->
+            <div class="w-10 h-10 bg-gray-600 rounded-full overflow-hidden">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=4b5563&color=fff" alt="User"
+                    class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 px-8 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+
+                    <div class="flex items-center space-x-4">
+                        <!-- Time Filter -->
+                        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                            <button onclick="app.setTimeFilter('day')" id="btn-day"
+                                class="px-3 py-1.5 text-sm rounded-md transition filter-btn"
+                                data-filter="day">Day</button>
+                            <button onclick="app.setTimeFilter('7days')" id="btn-7days"
+                                class="px-3 py-1.5 text-sm rounded-md transition filter-btn" data-filter="7days">7
+                                days</button>
+                            <button onclick="app.setTimeFilter('month')" id="btn-month"
+                                class="px-3 py-1.5 text-sm rounded-md transition filter-btn"
+                                data-filter="month">Month</button>
+                            <button onclick="app.setTimeFilter('year')" id="btn-year"
+                                class="px-3 py-1.5 text-sm rounded-md transition filter-btn"
+                                data-filter="year">Year</button>
+                            <button onclick="app.setTimeFilter('all')" id="btn-all"
+                                class="px-3 py-1.5 text-sm rounded-md transition filter-btn" data-filter="all">All
+                                time</button>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="relative">
+                            <input type="text" id="search-input" placeholder="Search"
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="flex-1 overflow-y-auto bg-gray-50">
+                <div class="flex h-full">
+                    <!-- Left Section -->
+                    <div class="flex-1 p-8 space-y-6">
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Total Active Events -->
+                            <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600 mb-1">Total Active Events</p>
+                                        <p class="text-xs text-gray-400">Last 7 days</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-end space-x-2">
+                                    <span class="text-3xl font-bold text-gray-900" id="stat-total">0</span>
+                                    <span
+                                        class="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded">+3</span>
+                                </div>
+                            </div>
+
+                            <!-- Urgent Alarms -->
+                            <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600 mb-1">Urgent Alarms</p>
+                                        <p class="text-xs text-gray-400">Last 7 days</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-end space-x-2">
+                                    <span class="text-3xl font-bold text-gray-900" id="stat-urgent">0</span>
+                                    <span
+                                        class="text-sm font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Ongoing Calls -->
+                            <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600 mb-1">Ongoing Calls</p>
+                                        <p class="text-xs text-gray-400">Last 7 days</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-end space-x-2">
+                                    <span class="text-3xl font-bold text-gray-900" id="stat-calls">0</span>
+                                    <span
+                                        class="text-sm font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded">+5</span>
+                                </div>
+                            </div>
+
+                            <!-- Recently Cleared -->
+                            <div class="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600 mb-1">Recently Cleared</p>
+                                        <p class="text-xs text-gray-400">Last 7 days</p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-end space-x-2">
+                                    <span class="text-3xl font-bold text-gray-900" id="stat-cleared">0</span>
+                                    <span class="text-sm text-gray-500">/hour</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Timeline Chart -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Event Timeline Distribution</h3>
+                                    <p class="text-sm text-gray-500 mt-1">Last 24 days</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <button
+                                        class="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                        Download report ↓
+                                    </button>
+                                    <button
+                                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        Event type filters
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="timelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSocket and Real-time Updates Script -->
+    <script>
+        const app = {
+            data: {
+                stats: {
+                    total_active: 0,
+                    urgent_alarms: 0,
+                    ongoing_calls: 0,
+                    recently_cleared: 0
+                },
+                recentEvents: [],
+                timeFilter: '7days',
+                timelineChart: null,
+                ws: null,
+                allEvents: []
+            },
+
+            init() {
+                console.log("[v0] Initializing Hospital Monitor Dashboard");
+                this.setupWebSocket();
+                this.loadStats();
+                this.loadRecentEvents();
+                this.loadTimeline();
+
+                // Refresh stats every 10 seconds
+                setInterval(() => this.loadStats(), 10000);
+
+                // Refresh timeline every 30 seconds
+                setInterval(() => this.loadTimeline(), 30000);
+
+                // Set initial filter button state
+                this.updateFilterButtons();
+            },
+
+            setupWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+                this.data.ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+
+                this.data.ws.onopen = () => {
+                    console.log("[v0] WebSocket connected");
+                };
+
+                this.data.ws.onmessage = (event) => {
+                    console.log("[v0] WebSocket message received:", event.data);
+                    this.loadRecentEvents();
+                    this.loadStats();
+                };
+
+                this.data.ws.onerror = (error) => {
+                    console.error("[v0] WebSocket error:", error);
+                };
+
+                this.data.ws.onclose = () => {
+                    console.log("[v0] WebSocket disconnected, reconnecting in 5s...");
+                    setTimeout(() => this.setupWebSocket(), 5000);
+                };
+            },
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/stats');
+                    const stats = await response.json();
+
+                    this.data.stats = stats;
+
+                    // Update UI
+                    document.getElementById('stat-total').textContent = stats.total_active;
+                    document.getElementById('stat-urgent').textContent = stats.urgent_alarms;
+                    document.getElementById('stat-calls').textContent = stats.ongoing_calls;
+                    document.getElementById('stat-cleared').textContent = stats.recently_cleared;
+
+                    console.log("[v0] Stats loaded:", stats);
+                } catch (e) {
+                    console.error("[v0] Error loading stats:", e);
+                }
+            },
+
+            async loadRecentEvents() {
+                try {
+                    const response = await fetch('/api/events/recent');
+                    this.data.recentEvents = await response.json();
+
+                    console.log("[v0] Recent events loaded:", this.data.recentEvents.length);
+                    this.renderRecentEvents();
+                } catch (e) {
+                    console.error("[v0] Error loading recent events:", e);
+                }
+            },
+
+            renderRecentEvents() {
+                const container = document.getElementById('recent-calls');
+                container.innerHTML = '';
+
+                console.log("[v0] Rendering recent events. Count:", this.data.recentEvents.length);
+
+                if (!this.data.recentEvents || this.data.recentEvents.length === 0) {
+                    container.innerHTML = '<div class="text-gray-500 text-center py-8">No active calls</div>';
+                    return;
+                }
+
+                this.data.recentEvents.forEach(event => {
+                    const card = document.createElement('div');
+
+                    const eventType = event.event_type || event.event || 'Unknown';
+                    const bgColor = this.getEventTypeColor(eventType);
+                    const darkBgColor = this.adjustBrightness(bgColor, -20);
+                    const lightBgColor = this.adjustBrightness(bgColor, 50);
+
+                    card.className = 'call-card relative overflow-hidden rounded-xl shadow-md border border-gray-100 p-5';
+                    card.style.backgroundColor = '#ffffff';
+
+                    card.innerHTML = `
+                        <div class="absolute inset-0 opacity-10">
+                            <div class="absolute -right-4 -top-4 w-32 h-32 rounded-full" style="background-color: ${bgColor};"></div>
+                            <div class="absolute -left-4 -bottom-4 w-24 h-24 rounded-full" style="background-color: ${bgColor};"></div>
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-md" style="background-color: ${darkBgColor};">
+                                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-lg">${event.room || 'Unknown Room'}</h4>
+                                        <p class="text-gray-600 text-sm">${event.bed_name || ('Bed ' + (event.bed_number || 'N/A'))}</p>
+                                    </div>
+                                </div>
+                                <span class="event-badge px-3 py-1 rounded-full font-semibold text-sm" style="background-color: ${lightBgColor}; color: ${bgColor};">${eventType}</span>
+                            </div>
+                            
+                            <div class="space-y-2 text-gray-700">
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 110-16 8 8 0 000 16zm1-12a1 1 0 100-4 1 1 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span>${this.getEventDuration(event)}</span>
+                                </div>
+                                
+                                ${event.floor_name || event.ward_name ? `
+                                    <div class="flex items-center space-x-2 text-sm">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L9.9 13.95a7 7 0 01-9.9-9.9zM9 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>${event.floor_name || 'N/A'} - ${event.ward_name || 'N/A'}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    card.onclick = () => this.viewEventDetails(event);
+                    container.appendChild(card);
+                });
+            },
+
+            async loadTimeline() {
+                try {
+                    const days = this.getFilteredDays();
+                    const response = await fetch(`/api/timeline?days=${days}`);
+                    const data = await response.json();
+
+                    this.renderTimelineChart(data.timeline);
+                } catch (e) {
+                    console.error("[v0] Error loading timeline:", e);
+                }
+            },
+
+            renderTimelineChart(timelineData) {
+                const ctx = document.getElementById('timelineChart');
+                if (!ctx) return;
+
+                // Prepare chart data
+                const labels = Object.keys(timelineData).sort();
+                const datasets = {};
+
+                // Aggregate all event types
+                labels.forEach(date => {
+                    Object.keys(timelineData[date]).forEach(eventType => {
+                        if (!datasets[eventType]) {
+                            datasets[eventType] = {
+                                label: eventType,
+                                data: [],
+                                borderColor: this.getEventTypeColor(eventType),
+                                backgroundColor: this.getEventTypeColor(eventType) + '20',
+                                tension: 0.4,
+                                fill: true
+                            };
+                        }
+                    });
+                });
+
+                // Fill data
+                labels.forEach(date => {
+                    Object.keys(datasets).forEach(eventType => {
+                        datasets[eventType].data.push(timelineData[date][eventType] || 0);
+                    });
+                });
+
+                // Destroy old chart if exists
+                if (this.data.timelineChart) {
+                    this.data.timelineChart.destroy();
+                }
+
+                this.data.timelineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: Object.values(datasets)
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+
+            getFilteredDays() {
+                const filterMap = {
+                    'day': 1,
+                    '7days': 7,
+                    'month': 30,
+                    'year': 365,
+                    'all': 3650
+                };
+                return filterMap[this.data.timeFilter] || 7;
+            },
+
+            setTimeFilter(filter) {
+                this.data.timeFilter = filter;
+                this.updateFilterButtons();
+                this.loadTimeline();
+            },
+
+            updateFilterButtons() {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === this.data.timeFilter) {
+                        btn.classList.add('bg-white', 'shadow');
+                    } else {
+                        btn.classList.remove('bg-white', 'shadow');
+                    }
+                });
+            },
+
+            getEventTypeColor(type) {
+                const defaultColors = {
+                    'Call': '#3b82f6',
+                    'Emergency': '#dc2626',
+                    'Alarm': '#ef4444',
+                    'Assistance': '#eab308',
+                    'Accept': '#10b981',
+                    'Cancel': '#8b5cf6',
+                    'Presence': '#06b6d4',
+                    'Reset': '#6b7280',
+                    'ROOM SERVICE': '#f59e0b',
+                    'Doctor Present': '#ec4899',
+                    'CATERING SERVICE': '#14b8a6',
+                    'Isolation': '#a855f7',
+                    'Low Battery': '#f97316'
+                };
+                return defaultColors[type] || '#6b7280';
+            },
+
+            adjustBrightness(color, percent) {
+                const num = parseInt(color.replace('#', ''), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+                const G = Math.min(255, Math.max(0, (num >> 8 & 0x00FF) + amt));
+                const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
+                return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+            },
+
+            viewEventDetails(event) {
+                console.log("[v0] View event details:", event);
+                // Could expand to show full event modal
+            },
+
+            toggleFullscreen() {
+                const rightSidebar = document.querySelector('.w-96');
+                rightSidebar.classList.toggle('fullscreen');
+            }
+        };
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => app.init());
+
+        let customColors = {};
+
+        async function loadColorSchemes() {
+            try {
+                const response = await fetch('/api/config/colors');
+                const data = await response.json();
+                customColors = {};
+                data.colors.forEach(color => {
+                    customColors[color.event_type] = {
+                        color: color.color  // Use single color field
+                    };
+                });
+                console.log('[v0] Color schemes loaded:', customColors);
+                return customColors;
+            } catch (error) {
+                console.error('[v0] Error loading color schemes:', error);
+                return customColors;
+            }
+        }
+
+        loadColorSchemes().then(() => {
+            app.loadRecentEvents();
+            app.loadTimeline();
+        });
+
+        // Check for color updates periodically (every 3 seconds)
+        setInterval(() => {
+            loadColorSchemes();
+        }, 3000);
+    </script>
+</body>
+
+</html>
