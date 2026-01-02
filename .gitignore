@@ -41,3 +41,5 @@ __pycache__/
 # migrations cache
 migrations/**/__pycache__/
 EOF
+
+

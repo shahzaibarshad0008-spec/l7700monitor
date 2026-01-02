@@ -150,8 +150,17 @@ class ColorScheme(Base):
             'created_at': str(self.created_at)
         }
 
-def get_db_engine(db_url="mysql+pymysql://root:@localhost/hospital_monitor"):
-    return create_engine(db_url, echo=False, pool_pre_ping=True)
+def get_db_engine(
+    db_url="mysql+pymysql://root:@localhost/hospital_monitor",
+    socket_path="/opt/lampp/var/mysql/mysql.sock"
+):
+    return create_engine(
+        db_url,
+        echo=False,
+        pool_pre_ping=True,
+        connect_args={"unix_socket": socket_path},
+    )
+
 
 def get_db_session(engine):
     Session = sessionmaker(bind=engine)

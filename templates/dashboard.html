@@ -460,7 +460,7 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-gray-800 text-lg">${event.room || 'Unknown Room'}</h4>
+                                        <h4 class="font-bold text-gray-800 text-lg">${event.room_name || 'Unknown Room'}</h4>
                                         <p class="text-gray-600 text-sm">${event.bed_name || ('Bed ' + (event.bed_number || 'N/A'))}</p>
                                     </div>
                                 </div>
@@ -661,7 +661,7 @@
         // Check for color updates periodically (every 3 seconds)
         setInterval(() => {
             loadColorSchemes();
-        }, 3000);
+        }, 30000);
     </script>
 </body>
 
